@@ -4,7 +4,7 @@ public static class Day3
 {
     public static string Solve()
     {
-        List<char> wrongItems = new();
+        List<char> wrongItemTypes = new();
 
         Dictionary<char, int> itemTypeOccurrenceInGroup = new();
         List<char> groupBadges = new();
@@ -17,7 +17,7 @@ public static class Day3
             // First task
             var firstPocketTypes = line[0..(line.Length / 2)].ToHashSet();
 
-            wrongItems.Add(line[(line.Length / 2)..^0].First(c => firstPocketTypes.Contains(c)));
+            wrongItemTypes.Add(line[(line.Length / 2)..^0].First(c => firstPocketTypes.Contains(c)));
 
             // Second task
             foreach (char itemType in line.ToHashSet())
