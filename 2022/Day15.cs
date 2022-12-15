@@ -1,4 +1,6 @@
-﻿namespace _2022;
+﻿using System.Globalization;
+
+namespace _2022;
 
 public static class Day15
 {
@@ -38,6 +40,7 @@ public static class Day15
             beacons.Add(new Coordinate(beaconX, beaconY));
         }
 
+        // Part 1
         foreach (var coordinate in beacons)
         {
             FillOnMap(coordinate, 'B');
@@ -59,7 +62,43 @@ public static class Day15
             }
         }
 
-        return FilledCoordinates.Count(c => c.Y == 2000000 && SymbolMap.ContainsKey(c) && SymbolMap[c] == '#').ToString();
+        var part1Solution = FilledCoordinates.Count(c => c.Y == 2000000 && SymbolMap.ContainsKey(c) && SymbolMap[c] == '#').ToString();
+
+        // Part 2
+        List<Coordinate> pointsToCheck = new();
+        foreach ((var coordinate, int manhattan) in sensors)
+        {
+            for (int i = 0; i <= manhattan; i++)
+            {
+                pointsToCheck.Add(new Coordinate(coordinate.X + (i + 1), coordinate.Y + (manhattan - i)));
+                pointsToCheck.Add(new Coordinate(coordinate.X - (i + 1), coordinate.Y + (manhattan - i)));
+                pointsToCheck.Add(new Coordinate(coordinate.X + (i + 1), coordinate.Y - (manhattan - i)));
+                pointsToCheck.Add(new Coordinate(coordinate.X - (i + 1), coordinate.Y - (manhattan - i)));
+            }
+
+            pointsToCheck.Add(new Coordinate(coordinate.X, coordinate.Y - manhattan - 1));
+            pointsToCheck.Add(new Coordinate(coordinate.X, coordinate.Y + manhattan + 1));
+        }
+
+        foreach (var pointCoordinate in pointsToCheck)
+        {
+            if (pointCoordinate.X < 0 || pointCoordinate.Y < 0 || pointCoordinate.X > 4000000 || pointCoordinate.Y > 4000000)
+                continue;
+
+            bool solution = true;
+            foreach ((var sensorCoordinate, int manhattan) in sensors)
+            {
+                if (Math.Abs(sensorCoordinate.X - pointCoordinate.X) + Math.Abs(sensorCoordinate.Y - pointCoordinate.Y) <= manhattan)
+                {
+                    solution = false;
+                }
+            }
+
+            if (solution)
+                return (pointCoordinate.X * (decimal)4000000 + pointCoordinate.Y).ToString(CultureInfo.InvariantCulture);
+        }
+
+        return "?";
     }
 
     private static void FillOnMap(Coordinate coordinate, char symbol)
