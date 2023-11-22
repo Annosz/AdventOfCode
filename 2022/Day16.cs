@@ -11,7 +11,6 @@ public static class Day16
     static Dictionary<string, int> nodeValues = new Dictionary<string, int>();
     static List<Edge> edges = new List<Edge>();
 
-    static List<string> maxTrail;
     static int maxValvePressure = 0;
 
     public static string Solve()
@@ -82,59 +81,51 @@ public static class Day16
         } while (newlyAddedEdges.Count > 0);
 
         //Initialize 0 values as already collected
-        HashSet<string> collectedValues = nodeValues.Where(nv => nv.Value == 0).Select(nv => nv.Key).ToHashSet();
-        SearchForBestSolutionFromMinute(0, 0, starterNode, collectedValues, new List<string>());
+        HashSet<string> collectedNodes = nodeValues.Where(nv => nv.Value == 0).Select(nv => nv.Key).ToHashSet();
 
-        foreach (string line in maxTrail)
-            Console.WriteLine(line);
+        // Part 1
+        //SearchForBestSolutionFromMinute(0, 0, 30, starterNode, starterNode, collectedNodes);
+
+        // Part 2
+        SearchForBestSolutionFromMinute(0, 4, 4, starterNode, starterNode, collectedNodes);
 
         return maxValvePressure.ToString();
     }
-    public static void SearchForBestSolutionFromMinute(
-        int currentValue, 
-        int minute,
-        string currentNode,
-        HashSet<string> collectedValues,
-        List<string> trail)
+
+    public static void SearchForBestSolutionFromMinute(int collectedValue, int humanMinute, int elephantMinute,
+        string humanNode, string elephantNode, HashSet<string> collectedNodes)
     {
-        if (minute > 30 || collectedValues.Count == nodeValues.Count)
+        if (collectedNodes.Count == nodeValues.Count)
             return;
 
-        if (collectedValues.Contains(currentNode))
+        if (collectedNodes.Contains(humanNode))
         {
-            GoToNextValve(currentValue, minute, currentNode, collectedValues, trail);
+            foreach (var nextHumanEdge in edges.Where(e => e.U == humanNode && !collectedNodes.Contains(e.V) && humanMinute + e.Weight < 30))
+            {
+                // Elephant has lower role, it steps after the human and does not step on the same space
+                foreach (var nextElephantEdge in edges.Where(e => e.U == elephantNode && !collectedNodes.Contains(e.V) && e.V != nextHumanEdge.V && elephantMinute + e.Weight < 30))
+                {
+                    SearchForBestSolutionFromMinute(collectedValue, humanMinute + nextHumanEdge.Weight, elephantMinute + nextElephantEdge.Weight,
+                        nextHumanEdge.V, nextElephantEdge.V, collectedNodes);
+                }
+
+                // Elephant does not even has to step
+                SearchForBestSolutionFromMinute(collectedValue, humanMinute + nextHumanEdge.Weight, elephantMinute,
+                    nextHumanEdge.V, elephantNode, collectedNodes);
+            }
         }
         else
         {
-            TurnOnValve(currentValue, minute, currentNode, collectedValues, trail);
-        }
-    }
+            bool humanCanOpen = !collectedNodes.Contains(humanNode);
+            bool elephantCanOpen = !collectedNodes.Contains(elephantNode);
 
-    private static void TurnOnValve(int currentValue, int minute, string currentNode, HashSet<string> collectedValues, List<string> trail)
-    {
-        trail.Add($"Minute {minute}; Open valve {currentNode}, adding a {nodeValues[currentNode]} flow for {30 - minute} minutes (total {nodeValues[currentNode] * (30 - minute)})");
-        collectedValues.Add(currentNode);
+            int flowUntilEnd = (humanCanOpen ? nodeValues[humanNode] * (30 - humanMinute - 1) : 0)
+                + (elephantCanOpen ? nodeValues[elephantNode] * (30 - elephantMinute - 1) : 0);
 
-        int flowUntilEnd = nodeValues[currentNode] * (30 - minute - 1);
-        if (currentValue + flowUntilEnd > maxValvePressure)
-        {
-            maxTrail = new List<string>(trail);
-            maxValvePressure = currentValue + flowUntilEnd;
-        }
+            maxValvePressure = Math.Max(maxValvePressure, collectedValue + flowUntilEnd);
 
-        SearchForBestSolutionFromMinute(currentValue + flowUntilEnd, minute + 1, currentNode, collectedValues, trail);
-
-        collectedValues.Remove(currentNode);
-        trail.RemoveAt(trail.Count - 1);
-    }
-
-    private static void GoToNextValve(int currentValue, int minute, string currentNode, HashSet<string> collectedValues, List<string> trail)
-    {
-        foreach (var nextEdge in edges.Where(e => e.U == currentNode && !collectedValues.Contains(e.V)))
-        {
-            trail.Add($"Minute {minute}; Go to valve {nextEdge.V}");
-            SearchForBestSolutionFromMinute(currentValue, minute + nextEdge.Weight, nextEdge.V, collectedValues, trail);
-            trail.RemoveAt(trail.Count - 1);
+            SearchForBestSolutionFromMinute(collectedValue + flowUntilEnd, humanMinute + (humanCanOpen ? 1 : 0), elephantMinute + (elephantCanOpen ? 1 : 0), 
+                humanNode, elephantNode, new HashSet<string>(collectedNodes) { humanNode, elephantNode });
         }
     }
 }
