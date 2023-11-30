@@ -17,9 +17,11 @@ public static class Day17
         new List<int>{ 0b0011000, 0b0011000 },
     };
 
+    private static long SealedOffHeight = 0;
+
     public static string Solve()
     {
-        for (int round = 0; round < 2022; round++)
+        for (long round = 0; round < 1000000000000; round++)
         {
             InitializeChamber();
             InitializeFallingRock();
@@ -30,9 +32,10 @@ public static class Day17
             }
 
             AddRockToChamber();
+            //CompressChamber();
         }
 
-        return Chamber.Count.ToString();
+        return (SealedOffHeight + Chamber.Count).ToString();
     }
 
     private static void InitializeChamber() => Chamber.AddRange(Enumerable.Repeat(0, 3 + Rocks.First().Count));
@@ -81,5 +84,26 @@ public static class Day17
     private static void AddRockToChamber() => Chamber = Chamber.Zip(FallingRock, (c, r) => c | r)
         .Concat(Chamber.Skip(FallingRock.Count))
         .Where(c => c != 0).ToList();
+
+    private static void CompressChamber()
+    {
+        int mask = 0b0000000;
+
+        int sealedOffHeight;
+        for (sealedOffHeight = Chamber.Count - 1; sealedOffHeight > 0; sealedOffHeight--)
+        {
+            mask = Chamber[sealedOffHeight] | mask;
+            if (mask == 0b1111111)
+            {
+                break;
+            }
+        }
+
+        if (sealedOffHeight > 0)
+        {
+            Chamber = Chamber.Skip(sealedOffHeight + 1).ToList();
+            SealedOffHeight += sealedOffHeight + 1;
+        }
+    }
 }
 
