@@ -16,21 +16,25 @@ public static class Day3
 
         foreach (var line in File.ReadLines(@".\Input\Day3.txt"))
         {
-            Schemantic.Add(line);
+            var paddedLine = "." + line + ".";
+            Schemantic.Add(paddedLine);
         }
+        string padding = new(Enumerable.Repeat('.', Schemantic.First().Length).ToArray());
+        Schemantic.Insert(0, padding);
+        Schemantic.Add(padding);
 
-        for (int i = 0; i < Schemantic.Count; i++)
+        for (int i = 1; i < Schemantic.Count - 1; i++)
         {
             var simpleLine = Regex.Matches(Schemantic[i], @"[\p{N}]+").Cast<Match>().Select(x => x.Value).ToArray();
             var numbersInLine = simpleLine.Where(s => int.TryParse(s, out _)).Select(s => int.Parse(s)).ToList();
 
             int numberBeingChecked = 0;
             bool numberAddedToSum = false;
-            for (int j = 0; j < Schemantic[i].Length; j++)
+            for (int j = 1; j < Schemantic[i].Length - 1; j++)
             {
                 if (!Char.IsDigit(Schemantic[i][j]))
                 {
-                    if (j > 0 && Char.IsDigit(Schemantic[i][j - 1]))
+                    if (Char.IsDigit(Schemantic[i][j - 1]))
                     {
                         numberBeingChecked++;
                         numberAddedToSum = false;
@@ -41,37 +45,35 @@ public static class Day3
 
                 if (Char.IsDigit(Schemantic[i][j]))
                 {
-                    if ((j > 0 && !Char.IsDigit(Schemantic[i][j - 1]) && Schemantic[i][j - 1] != '.')
-                        || (i > 0 && !Char.IsDigit(Schemantic[i - 1][j]) && Schemantic[i - 1][j] != '.')
-                        || (j < Schemantic[i].Length - 1 && !Char.IsDigit(Schemantic[i][j + 1]) && Schemantic[i][j + 1] != '.')
-                        || (i < Schemantic.Count - 1 && !Char.IsDigit(Schemantic[i + 1][j]) && Schemantic[i + 1][j] != '.')
-                        || (i > 0 && j > 0 && !Char.IsDigit(Schemantic[i - 1][j - 1]) && Schemantic[i - 1][j - 1] != '.')
-                        || (i > 0 && j < Schemantic[i].Length - 1 && !Char.IsDigit(Schemantic[i - 1][j + 1]) && Schemantic[i - 1][j + 1] != '.')
-                        || (i < Schemantic.Count - 1 && j > 0 && !Char.IsDigit(Schemantic[i + 1][j - 1]) && Schemantic[i + 1][j - 1] != '.')
-                        || (i < Schemantic.Count - 1 && j < Schemantic[i].Length - 1 && !Char.IsDigit(Schemantic[i + 1][j + 1]) && Schemantic[i + 1][j + 1] != '.'))
+                    if (IsSpecialCharater(i, j - 1) || IsSpecialCharater(i - 1, j) || IsSpecialCharater(i, j + 1) || IsSpecialCharater(i + 1, j)
+                        || IsSpecialCharater(i - 1, j - 1) || IsSpecialCharater(i - 1, j + 1) || IsSpecialCharater(i + 1, j - 1) || IsSpecialCharater(i + 1, j + 1))
                     {
                         if (!numberAddedToSum)
                         {
-                            EnginePartSum += numbersInLine[numberBeingChecked];
                             numberAddedToSum = true;
 
-                            // Gear ratio check
-                            if (j > 0) CheckGearRatio(i, j - 1, numbersInLine[numberBeingChecked]);
-                            if (i > 0) CheckGearRatio(i - 1, j, numbersInLine[numberBeingChecked]);
-                            if (j < Schemantic[i].Length - 1) CheckGearRatio(i, j + 1, numbersInLine[numberBeingChecked]);
-                            if (i < Schemantic.Count - 1) CheckGearRatio(i + 1, j, numbersInLine[numberBeingChecked]);
-                            if (i > 0 && j > 0) CheckGearRatio(i - 1, j - 1, numbersInLine[numberBeingChecked]);
-                            if (i > 0 && j < Schemantic[i].Length - 1) CheckGearRatio(i - 1, j + 1, numbersInLine[numberBeingChecked]);
-                            if (i < Schemantic.Count - 1 && j > 0) CheckGearRatio(i + 1, j - 1, numbersInLine[numberBeingChecked]);
-                            if (i < Schemantic.Count - 1 && j < Schemantic[i].Length - 1) CheckGearRatio(i + 1, j + 1, numbersInLine[numberBeingChecked]);
+                            // Part 1
+                            EnginePartSum += numbersInLine[numberBeingChecked];
+
+                            // Part 2
+                            CheckGearRatio(i, j - 1, numbersInLine[numberBeingChecked]);
+                            CheckGearRatio(i - 1, j, numbersInLine[numberBeingChecked]);
+                            CheckGearRatio(i, j + 1, numbersInLine[numberBeingChecked]);
+                            CheckGearRatio(i + 1, j, numbersInLine[numberBeingChecked]);
+                            CheckGearRatio(i - 1, j - 1, numbersInLine[numberBeingChecked]);
+                            CheckGearRatio(i - 1, j + 1, numbersInLine[numberBeingChecked]);
+                            CheckGearRatio(i + 1, j - 1, numbersInLine[numberBeingChecked]);
+                            CheckGearRatio(i + 1, j + 1, numbersInLine[numberBeingChecked]);
                         }
                     }
                 }
             }
         }
 
-        return GearRationSum.ToString();
+        return EnginePartSum.ToString() + " " + GearRationSum.ToString();
     }
+
+    private static bool IsSpecialCharater(int i, int j) => !Char.IsDigit(Schemantic[i][j]) && Schemantic[i][j] != '.';
 
     static void CheckGearRatio(int i, int j, int currentNumber)
     {
@@ -87,7 +89,5 @@ public static class Day3
                 GearPeaces.Add((i, j), currentNumber);
             }
         }
-
     }
-
 }
