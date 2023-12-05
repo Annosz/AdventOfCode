@@ -1,4 +1,6 @@
-﻿namespace _2023;
+﻿using System.Diagnostics;
+
+namespace _2023;
 
 public static class Day5
 {
@@ -6,6 +8,8 @@ public static class Day5
 
     public static string Solve()
     {
+        Stopwatch sw = new Stopwatch();
+        sw.Start();
         List<Rule> rules = new();
         foreach (var line in File.ReadLines(@".\Input\Day5.txt"))
         {
@@ -45,7 +49,8 @@ public static class Day5
         }
         ApplyRules(rules);
 
-        return ranges.Min(r => r.Start).ToString();
+        sw.Stop();
+        return $"{sw.ElapsedMilliseconds} ms: {ranges.Min(r => r.Start)}";
     }
 
     private static void ApplyRules(List<Rule> rules)
