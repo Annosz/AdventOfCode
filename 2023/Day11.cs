@@ -1,4 +1,6 @@
-﻿namespace _2023;
+﻿using Shared;
+
+namespace _2023;
 
 public static class Day11
 {
@@ -37,12 +39,9 @@ public static class Day11
                 if (Map[i][j] == '#')
                     allGalaxies.Add(new Point(i, j));
 
-        // Find all combinations
-        var combinations = allGalaxies.SelectMany((x, i) => allGalaxies.Skip(i + 1), (x, y) => Tuple.Create(x, y)).ToList();
-
-        // Calculate distance sums
+        // Calculate distance sums for all combinations
         long sum = 0;
-        foreach (var (a, b) in combinations)
+        foreach (var (a, b) in allGalaxies.FindAllPairs())
         {
             // Row distance
             sum += Math.Abs(a.X - b.X) + EmptyRows.Where(i => Math.Min(a.X, b.X) < i && i < Math.Max(a.X, b.X)).Count() * (Multiplier - 1);

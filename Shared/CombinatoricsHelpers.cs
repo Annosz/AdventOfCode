@@ -2,6 +2,8 @@
 {
     public static class CombinatoricsHelpers
     {
+        public static IEnumerable<Tuple<T, T>> FindAllPairs<T>(this List<T> list) => list.SelectMany((x, i) => list.Skip(i + 1), (x, y) => Tuple.Create(x, y));
+
         public static IEnumerable<IEnumerable<T>> GetPermutations<T>(this IEnumerable<T> enumerable)
         {
             var array = enumerable as T[] ?? enumerable.ToArray();
@@ -45,7 +47,7 @@
             return sequence;
         }
 
-        static void Swap<T>(ref T a, ref T b)
+        private static void Swap<T>(ref T a, ref T b)
         {
             T temp = a;
             a = b;
