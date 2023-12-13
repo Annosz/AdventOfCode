@@ -12,9 +12,6 @@ public static class Day12
         foreach (var line in File.ReadLines(@".\Input\Day12.txt"))
         {
             var lineSplit = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            var lineSplitBegin = string.Join("?", Enumerable.Repeat(lineSplit[0], RepeatFactor));
-            var lineSplitEnd = string.Join(",", Enumerable.Repeat(lineSplit[1], RepeatFactor));
-            Map.Add((lineSplitBegin, lineSplitEnd.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(n => int.Parse(n)).ToArray()));
 
             var template = string.Join("?", Enumerable.Repeat(lineSplit[0], RepeatFactor));
             var intervals = string.Join(",", Enumerable.Repeat(lineSplit[1], RepeatFactor)).Split(',', StringSplitOptions.RemoveEmptyEntries).Select(n => int.Parse(n)).ToArray();
