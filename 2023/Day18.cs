@@ -2,9 +2,6 @@
 
 public static class Day18
 {
-    private static readonly List<Point> DigCells = new();
-    private static readonly HashSet<Point> Trench = new();
-
     private static readonly List<Instruction> Instructions = new();
 
     private const bool IsPart2 = true;
@@ -17,61 +14,26 @@ public static class Day18
             Instructions.Add(new(lineSplit[0][0], int.Parse(lineSplit[1]), new string(lineSplit[2].Skip(2).SkipLast(1).ToArray())));
         }
 
-        long lowestX = 0;
-        long lowestY = 0;
+        // Shoelace formula for polygonal area
+        var lastPosition = new Point(0, 0);
         var currentPosition = new Point(0, 0);
-        DigCells.Add(currentPosition);
+        long edge = 0;
+        long sum1 = 0;
+        long sum2 = 0;
         foreach (var instruction in Instructions)
         {
-            for (var i = 0; i < instruction.GetCount(); i++)
+            currentPosition = currentPosition with
             {
-                currentPosition = currentPosition with { X = currentPosition.X + instruction.GetDeirection().X, Y = currentPosition.Y + instruction.GetDeirection().Y };
-                DigCells.Add(currentPosition);
-
-                lowestX = Math.Min(lowestX, currentPosition.X);
-                lowestY = Math.Min(lowestY, currentPosition.Y);
-            }
+                X = currentPosition.X + instruction.GetDeirection().X * instruction.GetCount(),
+                Y = currentPosition.Y + instruction.GetDeirection().Y * instruction.GetCount()
+            };
+            edge += instruction.GetCount();
+            sum1 += lastPosition.X * currentPosition.Y;
+            sum2 += currentPosition.X * lastPosition.Y;
+            lastPosition = currentPosition;
         }
 
-        for (int i = 0; i < DigCells.Count; i++)
-        {
-            Trench.Add(DigCells[i] with { X = DigCells[i].X + (lowestX * -1), Y = DigCells[i].Y + (lowestY * -1) });
-        }
-
-        Queue<Point> fillQueue = new Queue<Point>();
-        HashSet<Point> fillQueueContains = new HashSet<Point>();
-        fillQueue.Enqueue(new Point(235, 235));
-        while (fillQueue.TryDequeue(out var currentFill))
-        {
-            Trench.Add(currentFill);
-
-            Point nextElement = currentFill with { X = currentFill.X + 1 };
-            if (!Trench.Contains(nextElement) && !fillQueueContains.Contains(nextElement))
-            {
-                fillQueue.Enqueue(nextElement);
-                fillQueueContains.Add(nextElement);
-            }
-            nextElement = currentFill with { X = currentFill.X - 1 };
-            if (!Trench.Contains(nextElement) && !fillQueueContains.Contains(nextElement))
-            {
-                fillQueue.Enqueue(nextElement);
-                fillQueueContains.Add(nextElement);
-            }
-            nextElement = currentFill with { Y = currentFill.Y + 1 };
-            if (!Trench.Contains(nextElement) && !fillQueueContains.Contains(nextElement))
-            {
-                fillQueue.Enqueue(nextElement);
-                fillQueueContains.Add(nextElement);
-            }
-            nextElement = currentFill with { Y = currentFill.Y - 1 };
-            if (!Trench.Contains(nextElement) && !fillQueueContains.Contains(nextElement))
-            {
-                fillQueue.Enqueue(nextElement);
-                fillQueueContains.Add(nextElement);
-            }
-        }
-
-        return Trench.Count().ToString();
+        return (Math.Abs(sum1 - sum2) / 2 + edge / 2 + 1).ToString();
     }
 
     private record Point(long X, long Y);
