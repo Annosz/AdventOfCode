@@ -4,54 +4,43 @@ namespace _2023;
 
 public static class Day20
 {
-    public static Dictionary<string, Module> Modules = new Dictionary<string, Module>();
-    public static Queue<Pulse> Pulses = new Queue<Pulse>();
+    public static readonly Dictionary<string, Module> Modules = new();
+    public static readonly Queue<Pulse> Pulses = new();
 
+    private static int Round = 1;
+    public static readonly long[] PulseCount = new long[] { 0, 0 };
+
+    private const bool IsPartOne = false;
     // Part 2 information gathered by examining the input... these are the first to last conjunction modules in the input
     public static readonly string[] ImportantModulNames = new[] { "kb", "qt", "ck", "hc" };
-    public static long[] PulseCount = new long[] { 0, 0 };
-
-    public static int Round = 1;
-
-    public const bool IsPartOne = false;
 
     public static string Solve()
     {
-        List<string> conjunctionpModules = new List<string>();
         foreach (var line in File.ReadLines(@".\Input\Day20.txt"))
         {
             var lineSplit = line.Split("->", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             string name = lineSplit[0];
             string[] targets = lineSplit[1].Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-            Module module;
-            if (name.StartsWith("%"))
+            Module module = name.First() switch
             {
-                module = new FlipFlipModule(name[1..], targets.ToList());
-            }
-            else if (name.StartsWith("&"))
-            {
-                module = new ConjunctionModule(name[1..], targets.ToList());
-                conjunctionpModules.Add(module.Name);
-            }
-            else
-            {
-                module = new BroadcastModule(name, targets.ToList());
-            }
+                '%' => new FlipFlipModule(name[1..], targets.ToList()),
+                '&' => new ConjunctionModule(name[1..], targets.ToList()),
+                _ => new BroadcastModule(name, targets.ToList()),
+            };
             Modules.Add(module.Name, module);
         }
 
-        foreach (string conjunctionpModule in conjunctionpModules)
+        // Initialize conjunction inputs to low
+        foreach (ConjunctionModule conjunctionModule in Modules.Values.OfType<ConjunctionModule>())
         {
-            var senders = Modules.Where(e => e.Value.Targets.Contains(conjunctionpModule)).Select(e => e.Key).ToList();
+            var senders = Modules.Where(e => e.Value.Targets.Contains(conjunctionModule.Name)).Select(e => e.Key).ToList();
             foreach (var sender in senders)
-            {
-                (Modules[conjunctionpModule] as ConjunctionModule).IsOn[sender] = false;
-            }
+                conjunctionModule.IsOn[sender] = false;
         }
 
+        // Simulate button presses
         while (Modules.Where(m => ImportantModulNames.Contains(m.Key)).Any(m => !((ConjunctionModule)m.Value).LowSignalRound.Any()))
-        //for (Round = 1; Round <= 30000; Round++)
         {
             Pulses.Enqueue(new Pulse("broadcaster", "-", false));
             PulseCount[0]++;
@@ -70,7 +59,6 @@ public static class Day20
 
         // Part 2 prediction for RX
         var ImportantRounds = Modules.Where(m => ImportantModulNames.Contains(m.Key)).Select(m => ((ConjunctionModule)m.Value).LowSignalRound).ToList();
-
         return MathHelpers.LeastCommonMultiple(ImportantRounds.Select(r => r.First()).ToArray()).ToString();
     }
 
