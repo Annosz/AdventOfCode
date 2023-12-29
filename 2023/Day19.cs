@@ -4,8 +4,9 @@ namespace _2023;
 
 public static class Day19
 {
-    private static readonly List<Part> Parts = new List<Part>();
-    private static readonly Dictionary<string, List<Instruction>> Instructions = new Dictionary<string, List<Instruction>>();
+    private static readonly Dictionary<string, List<Instruction>> Instructions = new();
+    private static readonly Dictionary<char, int> PropertyMap = new() { { 'x', 0 }, { 'm', 1 }, { 'a', 2 }, { 's', 3 } };
+    private static readonly List<Part> Parts = new();
 
     public static string Solve()
     {
@@ -51,49 +52,73 @@ public static class Day19
         }
 
         long sum = 0;
-        foreach (var part in Parts)
-        {
-            string station = "in";
-            string nextStation = "";
-            while (true)
-            {
-                foreach (var instruction in Instructions[station])
-                {
-                    if (instruction.Property == '-')
-                    {
-                        nextStation = instruction.Desitantion;
-                        break;
-                    }
-
-                    int value = (int)part.GetType().GetProperty(char.ToUpper(instruction.Property).ToString()).GetValue(part, null);
-                    if (instruction.Relation ? value < instruction.Number : value > instruction.Number)
-                    {
-                        nextStation = instruction.Desitantion;
-                        break;
-                    }
-                }
-
-                if (nextStation == "A")
-                {
-                    sum += part.X + part.M + part.A + part.S;
-                    break;
-                }
-                if (nextStation == "R")
-                {
-                    break;
-                }
-
-                station = nextStation;
-                nextStation = "";
-            }
-        }
+        string node = "in";
+        List<Range> ranges = new() { new Range(1, 4000), new Range(1, 4000), new Range(1, 4000), new Range(1, 4000) };
+        NavigateNode(node, ranges, ref sum);
 
         return sum.ToString();
     }
 
-    private record Part(int X, int M, int A, int S);
-    private record Instruction(char Property, bool Relation, int Number, string Desitantion)
+    private static void NavigateNode(string node, List<Range> ranges, ref long sum)
     {
+        if (ranges[0].End <= ranges[0].Start || ranges[1].End <= ranges[1].Start || ranges[2].End <= ranges[2].Start || ranges[3].End <= ranges[3].Start)
+        {
+            return;
+        }
 
+        if (node == "A")
+        {
+            sum += (ranges[0].End - ranges[0].Start + (long)1) * (ranges[1].End - ranges[1].Start + (long)1) * (ranges[2].End - ranges[2].Start + (long)1) * (ranges[3].End - ranges[3].Start + (long)1);
+            return;
+        }
+
+        if (node == "R")
+        {
+            return;
+        }
+
+        foreach (var instruction in Instructions[node])
+        {
+            if (instruction.Property == '-')
+            {
+                NavigateNode(instruction.Desitantion, new List<Range>(ranges), ref sum);
+                continue;
+            }
+
+            if (instruction.LessThan)
+            {
+                Range currentPropertyRange = ranges[PropertyMap[instruction.Property]];
+
+                var newRanges = new List<Range>(ranges);
+                newRanges[PropertyMap[instruction.Property]] = new Range(currentPropertyRange.Start, Math.Min(currentPropertyRange.End, instruction.Number - 1));
+                NavigateNode(instruction.Desitantion, newRanges, ref sum);
+
+                ranges[PropertyMap[instruction.Property]] = new Range(Math.Max(currentPropertyRange.Start, instruction.Number), currentPropertyRange.End);
+            }
+            else
+            {
+                Range currentPropertyRange = ranges[PropertyMap[instruction.Property]];
+
+                var newRanges = new List<Range>(ranges);
+                newRanges[PropertyMap[instruction.Property]] = new Range(Math.Max(currentPropertyRange.Start, instruction.Number + 1), currentPropertyRange.End);
+                NavigateNode(instruction.Desitantion, newRanges, ref sum);
+
+                ranges[PropertyMap[instruction.Property]] = new Range(currentPropertyRange.Start, Math.Min(currentPropertyRange.End, instruction.Number));
+            }
+        }
     }
+
+    private struct Range
+    {
+        public int Start { get; set; }
+        public int End { get; set; }
+        public Range(int start, int end)
+        {
+            Start = start;
+            End = end;
+        }
+    }
+
+    private record Part(int X, int M, int A, int S);
+    private record Instruction(char Property, bool LessThan, int Number, string Desitantion);
 }
