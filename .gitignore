@@ -289,3 +289,4 @@ __pycache__/
 
 # Advent of Code
 **/Input/*.txt
+**/Sample/*.txt
