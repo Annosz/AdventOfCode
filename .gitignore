@@ -288,5 +288,5 @@ __pycache__/
 *.xsd.cs
 
 # Advent of Code
-**/Input/*.txt
-**/Sample/*.txt
+**/Input/Day*.txt
+**/Sample/Day*.txt
