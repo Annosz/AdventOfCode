@@ -1,3 +1,3 @@
 ﻿using _2024;
 
-Console.WriteLine(Day6.Solve());
+Console.WriteLine(Day9.Solve());
