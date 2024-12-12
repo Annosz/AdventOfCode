@@ -9,7 +9,7 @@ public static class Day8
     private static readonly Dictionary<char, List<Point>> Towers = new();
     private static readonly HashSet<Point> InterferencePoints = new();
 
-    private const bool Part1 = false;
+    private const bool IsPart1 = false;
 
     public static string Solve()
     {
@@ -39,7 +39,7 @@ public static class Day8
                 var directionA = new Point(pair.Item1.X - pair.Item2.X, pair.Item1.Y - pair.Item2.Y);
                 var directionB = new Point(pair.Item2.X - pair.Item1.X, pair.Item2.Y - pair.Item1.Y);
 
-                if (Part1)
+                if (IsPart1)
                 {
                     InterferencePoints.Add(new Point(pair.Item1.X + directionA.X, pair.Item1.Y + directionA.Y));
                     InterferencePoints.Add(new Point(pair.Item2.X + directionB.X, pair.Item2.Y + directionB.Y));
