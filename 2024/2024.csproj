@@ -16,6 +16,9 @@
     <None Update="Input\Day1.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Input\Day15.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Input\Day14.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -51,6 +54,9 @@
     </None>
     <None Update="Input\Template.txt">
     <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Sample\Day15.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Sample\Day14.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
