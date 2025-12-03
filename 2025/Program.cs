@@ -1,3 +1,3 @@
-﻿using _2025;
+﻿using Shared.AoC;
 
-Console.WriteLine(Day3.Solve());
+Console.WriteLine(AoCTaskRunner.RunLatest());

@@ -1,24 +1,29 @@
-﻿namespace _2025;
+﻿using JetBrains.Annotations;
+using Shared.AoC;
 
-public static class Day3
+namespace _2025;
+
+[UsedImplicitly]
+public class Day3 : IAoCTask
 {
-    public static string Solve()
+    private const int N = 12;
+
+    public string Solve()
     {
-        const int N = 12;
         var batteryPower = 0L;
 
-        foreach (var line in File.ReadLines(@$".\Input\{nameof(Day3)}.txt"))
+        foreach (var line in File.ReadLines(@$".\Input\{GetType().Name}.txt"))
         {
             var lineVoltage = new char[N];
 
-            for (int i = 0; i < line.Length; i++)
+            for (var i = 0; i < line.Length; i++)
             {
-                for (int j = Math.Max(0, N - (line.Length - i)); j < N; j++)
+                for (var j = Math.Max(0, N - (line.Length - i)); j < N; j++)
                 {
                     if (lineVoltage[j] < line[i])
                     {
                         lineVoltage[j] = line[i];
-                        for (int k = j + 1; k < N; k++)
+                        for (var k = j + 1; k < N; k++)
                         {
                             lineVoltage[k] = '0';
                         }
